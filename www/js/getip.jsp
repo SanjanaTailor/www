@@ -1,0 +1,1 @@
+{ "ip": "<%= request.getRemoteAddr() %>" }

@@ -1,0 +1,470 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta http-equiv="content-type" content="text/html;charset=utf-8">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+		<!--link rel="stylesheet" href="css/themes/default/Default.css" /-->
+        <!--link rel="stylesheet" href="css/jquery.mobile-1.4.5.css" /-->
+        <link rel="stylesheet" href="css/themes/default/theme.css" />
+        <link rel="stylesheet" href="css/themes/default/jquery.mobile.icons.min.css" />
+		<!--link rel="stylesheet" href="css/themes/rebrand/RebrandDefault.css" /-->
+		<!--link rel="stylesheet" href="css/themes/default/jquery.mobile.structure-1.2.0.css"/-->
+        <link rel="stylesheet" href="css/jquery.mobile.structure-1.4.5.css"/>
+        <!--link rel="stylesheet" href="css/jquery.mobile.structure-1.2.0.css"/-->
+	    <!--link rel="stylesheet" href="css/rebrand/redNgreenRebrand.css" /-->
+	    <!--link rel="stylesheet" href="css/rebrand/orange.css" /-->
+	    <!--link rel="stylesheet" href="css/themes/rebrand/yellow.css" /-->
+	    <meta name = "format-detection" content = "telephone=no">
+        <!-- hide the dialog close button -->
+        <title>Approvals</title>
+        <style>
+		   .ui-dialog .ui-header .ui-btn-icon-notext { display:none; }
+		    div{
+			   color:darkslategray;
+		    }
+		    h2 {
+			   margin: 0;
+		    }
+		    .ui-page
+		    {  
+               background: #FFFFFF url("images/swoosh_iphone4.png") repeat left top;
+		    }
+		    .print
+            {
+                font-size:small;
+            }
+            [data-role="listview"]{
+                opacity: 0.9;
+            }
+            [data-role="footer"], [data-role="header"]{
+                opacity: 0.9;
+            }
+		    label
+			{
+				font-size: 0.875em; /* 14px/16=0.875em */
+			}
+            [data-role="button"]
+            {
+                -webkit-box-shadow: none;
+                -moz-box-shadow: none;
+                box-shadow: none;
+                border-style:solid;
+                text-shadow: 0 1px 1px #b7b7b7;
+            }
+            .coll .ui-btn-text{ white-space:normal; word-break:normal; }
+			.columnA {padding-right: 5px;}
+			.columnB {padding-left: 5px;}
+            summary {text-align:left;}
+        </style>
+        <!--script src="js/jquery-1.8.3.js"></script-->
+        <script src="js/jquery-2.2.4.js"></script>
+        <script src="js/jquery-migrate-1.4.1.js"></script>
+        <!--link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" /-->
+        <!--script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script-->
+        <script src="js/jquery.mobile-1.4.5.js"></script>
+        <!--script src="js/jquery.mobile-1.2.0.min.js"></script-->
+        <script src="js/jsOAuth-1.3.6.js"></script>
+        <script src="js/jsrender.js"></script>
+        <script src="js/OAuthGateway.js"></script>
+        <script src="js/AirGateway.js"></script>
+        <script src="js/AirRouter.js"></script>
+        <script src="js/DefaultErrorHandler.js"></script>
+        <script src="js/RouterService.js"></script>
+        <script src="js/TrialRouterService.js"></script>
+        <!--script src="js/MockRouterService.js"></script-->
+        <script src="js/ApprovalsStore.js"></script>
+        <script src="js/ApprovalsApp.js"></script>
+        <script src="js/ApprovalsModel.js"></script>
+        <script src="js/ApprovalsViewHelper.js"></script>
+        <script src="js/ApprovalsView.js"></script>
+        <script src="js/ApprovalsValidator.js"></script>
+        <script src="js/ApprovalsController.js"></script>
+        <!--Reduces Browser Delay onclick-->
+        <script type="text/javascript" src="js/fastclick.js"></script>
+		<script type="text/javascript" src="winstore-jscompat.js"></script>
+        <!--Change Script import based upon Platform -->
+        <!--Android-->
+        <!--script type="text/javascript" src="js/cordovaAndroid-2.5.0.js"></script-->
+        <!--iOS-->
+        <!--script type="text/javascript" src="js/cordova-2.7.0.js"></script-->
+        <!--Windows-->
+        <script type="text/javascript" src="//Microsoft.Phone.WinJS.2.1/js/base.js"></script>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript">
+            var app;
+            var originalConsoleLog = null;
+            function onBodyLoad() {
+                $.mobile.defaultPageTransition = 'none';
+                FastClick.attach(document.body);
+                $.mobile.allowCrossDomainPages = true;
+                if (isMobile()) {
+                    onMobile();
+                }
+                else {
+                    $.mobile.allowCrossDomainPages = true;
+                    onDeviceReady();
+                }
+            }
+            function onMobile() {
+                //document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+                //document.addEventListener("deviceready", mobileReady, false);
+                if (/Android/i.test(navigator.userAgent))
+                {
+                    document.addEventListener('deviceready', onDeviceReady(), false);
+                }
+                else
+                {
+                    document.addEventListener('deviceready', onDeviceReady, false);
+                }
+            }
+            function mobileReady() {
+                //navigator.notification.alert("Hey");
+                //;
+            }
+
+            function disableLogger(disableFlag) {
+                if (console != undefined && console.log != undefined) {
+                    if (originalConsoleLog == null) {
+                        originalConsoleLog = console.log;
+                    }
+                    if (disableFlag)
+                        console.log = function () { };
+                    else
+                        console.log = originalConsoleLog;
+                }
+            }
+            /* When this function is called, Cordova has been initialized and is ready to roll */
+            /* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+               see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+               for more details -jm */
+            function onDeviceReady() {
+                //StatusBar.hide();
+                //navigator.splashscreen.hide();
+                // Dynamically load the templates
+
+                // State if we want to see the console.log messages
+
+                disableLogger(false);
+
+                // Create the app
+                if (app != null) {
+                    this.app.destroy();
+                }
+                app = new ApprovalsApp();
+                // Now set up listeners for key events
+                initViewEventHandlers(); // In ApprovalsView.js
+                document.addEventListener("offline", app.onOffline, false);
+                document.addEventListener("online", app.onOnline, false);
+                document.addEventListener("pause", app.onPause, false);
+                document.addEventListener("resume", app.onResume, false);
+                document.addEventListener("showkeyboard", app.handleKeyboardShown, false);
+                document.addEventListener("backbutton", function () { backPressed() }, true);
+                app.getDeviceDetails();
+
+                // We need to see if we should show registration page or login Page
+                app.displayFirstScreen();
+            }
+            function backPressed() {
+                if ($.mobile.activePage.attr("id") == "categoriesPage") {
+                    app.controller.handleGoToLoginPage();
+                }
+                else if ($.mobile.activePage.attr("id") == "pendingPage" || $.mobile.activePage.attr("id") == "settingsPage" || $.mobile.activePage.attr("id") == "categoryItemsPage") {
+                    app.controller.handleGoToCategoriesPage();
+                }
+                else if ($.mobile.activePage.attr("id") == "itemPage") {
+                    app.controller.goBackFromItemPage();
+                }
+                else if ($.mobile.activePage.attr("id") == "commentDialog") {
+                    app.handleCancelReject();
+                }
+                else if ($.mobile.activePage.attr("id") == "notificationDialog") {
+
+                }
+                else if ($.mobile.activePage.attr("id") == "confirmationDialog") {
+                    confirmationNoFunction();
+                }
+                else if ($.mobile.activePage.attr("id") == "loginPage" || $.mobile.activePage.attr("id") == "registrationPage") {
+                    navigator.app.exitApp();
+                }
+            }
+    </script>
+    </head>
+    <body onLoad="onBodyLoad();">
+	    <div data-role="page" id="loadingPage" hidden="true">
+        </div>
+
+        <div data-role="page" id="registrationPage" hidden="true">
+            <div data-role="content">
+				<img id="regSplash" class="splash" src="" width="100%"/>
+				<div class="ui-grid-a my-breakpoint raised" style="margin:0">
+					<div class="ui-block-a">
+						<label class="print" style="margin:0;">Enter your Username:</label>
+						<input style="margin:0;" class="text" type="text" data-mini="true" id="activationKey" value="" autocomplete="off" autocorrect="off" spellcheck="false" />
+					</div>
+					<div class="ui-block-b">
+						<label class="print" style="margin:0;">Enter your Password:</label>
+						<input style="margin:0;" class="text" type="text" data-mini="true" id="registrationPin" value="" autocomplete="off" autocorrect="off" spellcheck="false"/>
+					</div>
+				</div>
+				<div style="text-align:center;">
+                    <a href="#" id="registerPageBtn" data-role="button" data-inline="true" onclick="app.controller.handleRegisterDevice();return false;" style="margin:0;" data-mini="true">Register</a><br/><a class="netDep" onclick="app.view.handleGoToRegisterHelp(); return false;" data-inline="true" data-role="button" data-mini="true">Help</a>
+                </div>
+				<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+				<div id="supportDiv" class="ui-grid-a my-breakpoint">
+					<div class="ui-block-a" style="text-align:center;">
+						<label>Application Name:</label>
+						<input type="text" id="appName" value="MobileTester" disabled = true/>
+					</div>
+					<div class="ui-block-b" style="text-align:center;">
+						<label>API Version:</label>
+						<input type="text" id="appVersion" value="1.0.0.1" disabled = true/>
+					</div>
+				</div>
+			</div>
+        </div>
+
+        <div data-role="page" id="errorPage" hidden="true">
+
+            <div data-role="header" data-position="fixed">
+                <h1>Warning</h1>
+            </div>
+
+            <div data-role="content" style="text-align: center;">
+                <span id="errorType"></span><br/><br/>
+                <span id="errorMessage">A severe connection error occurred</span><br/><br/><br/>
+                <span>Please restart the app</span><br/>
+                <a onclick="app.restartApp();" data-role="button" data-inline="true" data-theme="c">Restart</a><br/>
+                <br/><br/><br/><br/><br/><br/>
+				<span>If necessary you can re-register</span><br/>
+                <a onclick="app.handleReRegister();" data-role="button" data-icon="gear" data-inline="true">Re-Register</a>
+            </div>
+        </div>
+
+        <div data-role="page" id="errorDialogPage" hidden="true">
+
+        </div>
+        <div data-role="page" id="loginPage" hidden="true">
+            <div data-role="content" style="text-align: center;">
+                <img id="splash" class="splash" src="" width="100%"/>
+                <fieldset><input  type="password" name="pin" id="loginPin" value="" placeholder="Enter Password..."  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/><a
+					id="loginBtn" class="loginBtn" data-role="button" data-inline="true" data-theme="e" onclick="app.controller.handleLogin(loginPin.value); return false" style="margin-top:0;" data-mini="true">Log in</a>
+                    <!--BRs add spaces on either side unless there is no gap between elements-->
+                </fieldset>
+				<a class="netDep" id="loginHelpBtn" onclick="app.view.handleGoToLoginHelp(); return false;" data-role="button" data-mini="true" data-inline="true" style="margin-top:0;">Help</a><br/>
+                <span class="print">&copy; Advanced Computer Software Group Ltd</span>
+                <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><span class="print">If necessary you can re-register</span><br/>
+                <a class="netDep" id="reregisterBtn" onclick="app.setMode(null); app.handleReRegister();" data-role="button" data-icon="gear" data-mini="true" data-inline="true">Re-Register</a>
+            </div>
+        </div>
+		<div data-role="page" id="categoriesPage" hidden="true">
+	        <div id="header" data-role="header" data-position="fixed">
+                <a data-theme="b" onclick="app.controller.handleGoToExit();" class="ui-btn-left" data-icon="delete">Exit</a><h1 style="margin-left:75px; margin-right:100px;">Approvals</h1><a data-theme="b" data-iconpos="right" class="ui-btn-right" id="refresh" onclick="app.controller.handleRefresh();" data-icon="refresh">Refresh</a>
+	        </div>
+
+	        <div id="content" data-role="content">
+                <ul class="list" data-role="listview" data-id="categoriesView" id="categoriesView" data-inset="true" data-filter="true" data-filter-placeholder="Search">
+               </ul>
+	        </div>
+            <div id="footer" data-role="footer" data-position="fixed" data-toggle="false">
+               <div data-role="navbar">
+                 <ul>
+                    <li><a data-theme="b" onclick="app.controller.handleGoToCategoriesPage(0);">Approvals</a></li>
+                    <li><a data-theme="b" onclick="app.controller.handleGoToPendingPage();">Pending</a></li>
+                    <li><a data-theme="b" onclick="app.controller.handleGoToSettingsPage();">Settings</a></li>
+                 </ul>
+               </div>
+            </div>
+        </div>
+        <div data-role="page" id="categoryItemsPage" hidden="true">
+
+            <div id="header" data-role="header" data-position="fixed">
+                <a data-theme="b" data-iconpos="left" onclick="app.controller.handleGoToCategoriesPage(-1);" data-icon="carat-l" class="ui-btn-left">Back</a><h1 id="titleCategory" style="margin-left:120px; margin-right:0; padding-left:0; padding-right:0px;">Approvals</h1>
+            </div>
+
+            <div data-role="content">
+                <!--ul class="list" data-autodividers="true" data-role="listview" data-filter="true" data-filter-placeholder="Search" data-id="categoryItemsView" id="categoryItemsView" data-inset="false"-->
+                <!--ul class="list" data-role="listview" data-id="categoryItemsView" id="categoryItemsView" data-inset="false"-->
+                <ul class="list" data-autodividers="true" data-role="listview" data-filter="true" data-filter-placeholder="Search" data-id="categoryItemsView" id="categoryItemsView" data-inset="true">
+                <!--ul class="list" data-role="listview" data-id="categoryItemsView" id="categoryItemsView" data-inset="true"-->
+                </ul>
+            </div>
+            <div id="footer" data-role="footer" data-position="fixed" data-toggle="false">
+                <div data-role="navbar">
+                    <ul>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToCategoriesPage(0);">Approvals</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToPendingPage();">Pending</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToSettingsPage();">Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="stretchable" data-role="page" id="itemPage" hidden="true">
+
+            <!--div data-role="header" data-position="fixed"-->
+            <div data-role="header" data-position="fixed">
+                <a data-theme="b" data-iconpos="left" onclick="app.controller.handleGoToCategoryItemsPage(-1);"  data-icon="carat-l" display="inline-block" class="ui-btn-left">Back</a><h1 display="inline-block" id="itemCategory" style="margin-left:90px; margin-right:0; padding-left:0; padding-right:0px;">Approvals</h1>
+            </div>
+
+            <div data-role="content">
+                <section>
+                  <div data-id="itemHeader" id="itemHeader">
+
+                  </div>
+                </section>
+                <section>
+                <div class="coloredButtons ui-grid-a" >
+                    <div class="ui-block-a"><a class="approve" id="approvePageBtn" data-role="button" data-inline="false" data-theme="d">Approve</a></div>
+                    <div class="ui-block-b"><a class="reject" id="rejectPageBtn" data-role="button" data-inline="false" data-theme="c">Reject</a></div>
+                </div>
+                    <ul id="otherButtons" data-role="listview" data-inset="false">
+
+                    </ul>
+                </section>
+                <br/>
+                <br/>
+                <ul class="list" data-id="itemDetailsView" id="itemDetailsView" data-role="listview" data-inset="true"></ul>
+                <div data-id="lineButtonArea" id="lineButtonArea">
+                </div>
+
+                <div data-id="linesView" id="linesView" data-icon="carat-r" data-collapsed-icon="carat-r" data-expanded-icon="carat-d">
+                </div>
+            </div>
+            <!--div data-role="footer" data-position="fixed"-->
+            <!--div data-role="footer" style="ui-fixed" data-toggle="false"-->
+            <div id="footer" data-role="footer" data-position="fixed" data-toggle="true">
+                <div data-role="navbar">
+                    <ul>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToCategoriesPage(0);">Approvals</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToPendingPage();">Pending</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToSettingsPage();">Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+		<div data-role="page" id="settingsPage" hidden="true">
+
+			<div data-role="header" data-position="fixed">
+                <a data-theme="b" data-iconpos="left" onclick="app.controller.handleGoToExit();" data-icon="delete" class="ui-btn-left">Exit</a><h1 style="margin-left:0px; margin-right:100px; padding-left:100px;">Settings</h1>
+			</div>
+
+			<div data-role="content">
+				<ul data-role="listview" data-inset="false">
+                    <li><p style="display:inline;">App Name</p><p class="ui-li-aside" id = "internalAppname"></p></li>
+					<li><p style="display:inline;">App Version</p><p class="ui-li-aside" id = "version"></p></li>
+					<li><p style="display:inline;">Device ID</p><p class="ui-li-aside" id = "uuid"></p></li>
+					<li><p style="display:inline;">Device Model</p><p class="ui-li-aside" id = "deviceModel"></p></li>
+					<li><p style="display:inline;">Platform</p><p class="ui-li-aside" id = "devicePlatform"></p></li>
+					<li><p style="display:inline;">Device OS Version</p><p class="ui-li-aside" id = "deviceVersion"></p></li>
+                    <!--li><p style="display:inline;">Tracker</p><p class="ui-li-aside" id = "traceRoute"></p></li-->
+				</ul>
+				<!-- a href="javascript:goToTerms();" data-rel="dialog" data-transition="flip" data-role="button" data-inline="false" data-theme="d" >Terms and Conditions</a-->
+			</div>
+
+			<div data-role="footer" data-position="fixed" data-toggle="false">
+				<div data-role="navbar">
+					<ul>
+						<li><a data-theme="b" onclick="app.controller.handleGoToCategoriesPage(0);">Approvals</a></li>
+						<li><a data-theme="b" onclick="app.controller.handleGoToPendingPage();">Pending</a></li>
+						<li><a data-theme="b" onclick="app.controller.handleGoToSettingsPage();">Settings</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+        <div data-role="page" id="pendingPage" hidden="true">
+
+            <div data-role="header" data-position="fixed">
+                <a data-theme="b" data-iconpos="left" onclick="app.controller.handleGoToExit();" data-icon="delete" class="ui-btn-left">Exit</a><h1 style="margin-left:0px; margin-right:100px; padding-left:100px;">Pending</h1>
+            </div>
+
+            <div data-role="content">
+                <ul class="list" data-id="pendingView" data-filter="true" data-filter-placeholder="Search" id="pendingView" data-role="listview" data-inset="true">
+                </ul>
+            </div>
+
+            <div id="footer" data-role="footer" data-position="fixed" data-toggle="false">
+                <div data-role="navbar">
+                    <ul>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToCategoriesPage(0);">Approvals</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToPendingPage();">Pending</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToSettingsPage();">Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div data-role="page" id="pendingItemPage" hidden="true">
+
+            <div data-role="header" data-position="fixed">
+                <a data-theme="b" data-iconpos="left" onclick="app.controller.handleGoToPendingPage(-1);" data-icon="carat-l" class="ui-btn-left">Pending</a><h1 style="margin-left:0px; margin-right:100px; padding-left:100px;">Pending</h1>
+            </div>
+
+            <div data-role="content">
+                <div id="pendingItemHeader" data-id="pendingItemHeader">
+                </div>
+            </div>
+
+            <div id="footer" data-role="footer" data-position="fixed" data-toggle="false">
+                <div data-role="navbar">
+                    <ul>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToCategoriesPage(0);">Approvals</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToPendingPage();">Pending</a></li>
+                        <li><a data-theme="b" onclick="app.controller.handleGoToSettingsPage();">Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- All the dialogs -->
+        <div data-role="dialog" id="commentDialog" data-close-btn="none" data-overlay-theme="f" hidden="true" data-dialog="true">
+            <div data-role="header" data-position="fixed" data-close-btn="none" >
+                <h3 style="margin-left:0; margin-right:0;">Confirmation</h3>
+            </div>
+
+            <div data-role="content">
+                <br />
+                <h3>Please add a comment</h3>
+                <textarea name="textArea" id="textArea"></textarea>
+                <div style="text-align:center;">
+                    <a id="rejectDialogBtn"  data-role="button" data-inline="true" data-theme="c">Reject</a>
+                    <a onclick="app.handleCancelReject(); return false;" href="#" data-role="button" data-inline="true">Cancel</a>
+                </div>
+            </div>
+        </div>
+        <div data-role="dialog" id="notificationDialog" data-overlay-theme="f" hidden="true" data-close-btn="right">
+            <div data-role="header" data-position="fixed" data-close-btn="none">
+                <h3 id="noteHeader" data-id="noteHeader"  style="margin-left:0; margin-right:0;">Information</h3>
+            </div>
+
+            <div data-role="content">
+                <br />
+                <h3 id="note"></h3>
+                <h4 id="noteCode" data-id="noteCode" style="text-align:center"></h4>
+                <div style="text-align:center;">
+                    <a rel='close' id="closeDialogBtn" data-role='button' href='#'>OK</a>
+                </div>
+            </div>
+
+        </div>
+        <div data-role="dialog" id="confirmationDialog" data-close-btn="none" data-overlay-theme="f" hidden="true">
+            <div data-role="header" data-position="fixed" data-close-btn="right">
+                <h3 style="margin-left:0; margin-right:0;">Confirmation</h3>
+            </div>
+
+            <div data-role="content">
+                <br/>
+                <h3 id="confirm"></h3>
+                <h3 style="text-align:center;">Do you want to continue?</h3>
+                <div style="text-align:center;">
+                    <a rel='close' id="yesDialogBtn"  data-role='button' data-icon='check' data-inline='true' data-theme="d">Yes</a>
+                    <a rel='close' data-rel="back"  id="noDialogBtn" data-role='button' data-icon='delete' data-inline='true' data-theme="c">No</a>
+                </div>
+            </div>
+
+        </div>
+        <!-- Placeholder for the templates -->
+	    <div id="templates"></div>
+    </body>
+
+</html>

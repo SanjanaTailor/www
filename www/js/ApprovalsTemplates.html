@@ -1,0 +1,69 @@
+﻿<script id="termsTemplate" type="text/x-jsrender">
+    <p>{{:term}}</p>
+</script>
+<script id="linesTemplate" type="text/x-jsrender">
+  <!--div data-role="collapsible" class="collapsible"-->
+  <ul data-role="button" class="detailsButton"><details>
+    <summary>{{:header2}}</summary>
+    <ul class="list" data-role="listview" data-inset="true">
+      {{for details}}
+          <li>
+            <p style="margin-top:3px"><strong>{{:key}}</strong></p><p class="description" style="margin:0;padding:0;">{{:value}}</p>
+          </li>
+      {{/for}}
+    </ul>
+  <!--/div-->
+  </details></ul>
+</script>
+<script id="categoriesTemplate" type="text/x-jsrender">
+  <li data-filtertext="{{:category}}">
+    <a class="category">
+      <div id ="{{:category}}" name="{{:category}}" style="display:inline"><strong>{{:category}}</strong></div>
+      <span class="ui-li-count">{{:count}}</span>
+    </a>
+  </li>
+</script>
+<script id="categoryItemsTemplate" type="text/x-jsrender">
+  <li category="{{:category}}">
+    <a class="categoryItem">
+      <div id ="{{:id}}" style="display:none;"></div>
+      <p><p>{{:header1}}</p><p>{{:header2}}</p><p class="ui-li-aside">{{:header4}}</p></p>
+    </a>
+  </li>
+</script>
+<script id="itemHeaderTemplate" type="text/x-jsrender">
+    <h1>{{:header1}}</h1>
+    <p>{{:header2}}</p>
+    <p>{{:header3}}</p>
+    <p>{{:header4}}</p>
+</script>
+<script id="pendingItemTemplate" type="text/x-jsrender">
+    <h2>{{:header1}}</h2>
+    <p>{{:header2}}</p>
+    <p>{{:header4}}</p>
+    <span style="color: {{if approved==true}} Green {{else}} Red {{/if}}"><p style="font-weight:600">{{if approved==true}} Approved {{else}} Rejected {{/if}}</p></span>
+</script>
+<script id="categoryTitleTemplate" type="text/x-jsrender">
+    <h1>{{:category}}</h1>
+</script>
+<script id="pendingTemplate" type="text/x-jsrender">
+  <li>
+    <a class="pendingItem" data-icon="delete">
+      <div id="{{:id}}" style="display:none;"></div>
+      <h3>
+        <span style="color: {{if approved==true}} Green {{else}} Red {{/if}}">{{if approved==true}} Approved {{else}} Rejected {{/if}}</span>
+      </h3>
+      <p>{{:header1}}</p>
+      <p>{{:header2}}</p>
+      <span class="ui-li-aside"><p style="margin-top: 2em;">{{:header4}}</p></span>
+    </a>
+  </li>
+</script>
+<script id="detailsTemplate" type="text/x-jsrender">
+  <li>
+      <p class="name" style="margin-top:3px"><strong>{{:key}}</strong></p><p class="description" style="margin:0;padding:0;">{{:value}}</p>
+  </li>
+</script>
+<script id="auxButtonTemplate" type="text/x-jsrender">
+  <li><a class='{{:name}}' href='{{:location}}' rel='external' target='_blank'><strong>{{:msg}}</strong></a></li>
+</script>
